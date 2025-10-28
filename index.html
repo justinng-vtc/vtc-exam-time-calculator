@@ -5,42 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Exam Time Calculator</title>
   <style>
-    :root { --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#22c55e; --warn:#f59e0b; --danger:#ef4444; }
+    :root {
+      --bg:#0f172a; --card:#111827; --muted:#64748b; --text:#e5e7eb; --accent:#22c55e; --border:#1f2937;
+      --chip-bg:#0b1220; --chip-border:#22324d; --table-head:#0b1220;
+    }
+    body.light {
+      --bg:#f8fafc; --card:#ffffff; --muted:#475569; --text:#0f172a; --accent:#16a34a; --border:#e2e8f0;
+      --chip-bg:#f1f5f9; --chip-border:#e2e8f0; --table-head:#f1f5f9;
+    }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px;position:relative}
     h1{font-size:28px;margin:0 0 12px}
     p{color:var(--muted)}
     .grid{display:grid;gap:12px}
     .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
     .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .card{background:var(--card);border:1px solid #1f2937;border-radius:16px;padding:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
     label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-    input,select,button,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #243244;background:#0b1220;color:var(--text)}
-    input:focus,select:focus,textarea:focus{outline:2px solid #334155;border-color:#334155}
-    button{cursor:pointer;background:#14223a;border-color:#1f2f4d}
+    input,select,button,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--chip-bg);color:var(--text)}
+    input:focus,select:focus,textarea:focus{outline:2px solid #33415522;border-color:#334155}
+    button{cursor:pointer;background:#14223a11;border-color:var(--border)}
     button.primary{background:var(--accent);color:#062e0f;border:none}
-    button.ghost{background:transparent;border-color:#334155}
-    .row{display:flex;gap:8px;align-items:center}
+    button.ghost{background:transparent;border-color:var(--border)}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .row > *{flex:1}
-    table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
-    th,td{padding:10px;border-bottom:1px solid #1f2937;text-align:left;font-size:14px}
-    th{background:#0b1220;color:#cbd5e1}
+    .tableWrap{width:100%;overflow-x:auto}
+    table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;min-width:900px}
+    th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+    th{background:var(--table-head);color:inherit}
     tr:last-child td{border-bottom:none}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;background:#0b1220;border:1px solid #22324d;color:#cbd5e1;font-size:12px}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;background:var(--chip-bg);border:1px solid var(--chip-border);color:inherit;font-size:12px}
     .right{display:flex;gap:8px;justify-content:flex-end}
-    .hint{font-size:12px;color:#9ca3af}
-    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0b1220;border:1px solid #22324d;padding:2px 6px;border-radius:6px}
-    .error{color:var(--danger);font-size:12px}
+    .hint{font-size:12px;color:var(--muted)}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:var(--chip-bg);border:1px solid var(--chip-border);padding:2px 6px;border-radius:6px}
+    .error{color:#ef4444;font-size:12px}
     .spacer{height:8px}
     .checks{display:flex;gap:10px;flex-wrap:wrap}
-    .checks label{display:flex;gap:6px;align-items:center;background:#0b1220;border:1px solid #22324d;border-radius:10px;padding:6px 10px;color:#cbd5e1}
+    .checks label{display:flex;gap:6px;align-items:center;background:var(--chip-bg);border:1px solid var(--chip-border);border-radius:10px;padding:6px 10px;color:inherit}
+    /* specific smaller checkbox + nowrap for std rule */
+    #s_stdRule{ transform: scale(0.9); transform-origin:left center; margin-right:6px; }
+    #stdRuleLabel{ white-space: nowrap; }
+    /* Mode toggle small, upper-right */
+    .modeToggle{position:absolute;right:12px;top:12px;background:transparent;border:1px solid var(--border);padding:1px 3px;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .modeToggle span{font-size:11px;line-height:1}
+
+    @media (max-width: 860px){
+      .grid.cols-3{grid-template-columns:1fr}
+      .grid.cols-2{grid-template-columns:1fr}
+      h1{font-size:22px}
+      .wrap{padding:0 12px}
+      input,select,button{font-size:16px}
+      .right{justify-content:flex-start}
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <button id="modeBtn" class="modeToggle" title="Toggle theme"><span id="modeEmoji">🌙</span></button>
     <h1>Exam Time Calculator</h1>
-    <p>Calculate end-times for students with different access arrangements. Now with one-click rules and automatic round-up.</p>
+    <p>Calculate end-times for students with different access arrangements. One-click rules, automatic round-up, CSV export & print.</p>
 
     <div class="card">
       <div class="grid cols-3">
@@ -49,8 +73,8 @@
           <input id="baseDuration" placeholder="1:45" value="1:00" />
         </div>
         <div>
-          <label>Exam start time <span class="hint">(optional, 24h e.g. <span class="kbd">09:30</span>)</span></label>
-          <input id="startTime" placeholder="HH:MM" />
+          <label>Exam start time <span class="hint">(optional, 24h e.g. <span class="kbd">0930</span> or <span class="kbd">09:30</span>)</span></label>
+          <input id="startTime" placeholder="HHMM or HH:MM" />
         </div>
         <div>
           <label>Location / Note <span class="hint">(optional, prints on export)</span></label>
@@ -83,9 +107,9 @@
           <div class="hint">Only one box can be ticked at a time. Untick all for 0%.</div>
         </div>
         <div>
-          <label>Standard rule</label>
+          <label>5-min break</label>
           <div class="checks">
-            <label><input id="s_stdRule" type="checkbox"/> +5 mins per 45 mins when base ≥ 90 mins</label>
+            <label id="stdRuleLabel"><input id="s_stdRule" type="checkbox"/> +5 mins per 45 mins when total (after %) ≥ 90 mins</label>
           </div>
         </div>
       </div>
@@ -107,26 +131,28 @@
           <button id="resetBtn" class="ghost">Reset</button>
         </div>
       </div>
-      <div class="hint">Columns include base end-time and adjusted end-time. Standard warnings at -15 and -5 minutes are shown when start time is provided.</div>
+      <div class="hint">Shows base end-time and adjusted end-time. Standard warnings at -15 and -5 minutes appear when a start time is set.</div>
       <div class="spacer"></div>
-      <table id="tbl">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Student</th>
-            <th>Rules</th>
-            <th>Base (mins)</th>
-            <th>Extra (mins)</th>
-            <th>Total (mins)</th>
-            <th>Starts</th>
-            <th>Ends (base)</th>
-            <th>Ends (adjusted)</th>
-            <th>Warn -15</th>
-            <th>Warn -5</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="tableWrap">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student</th>
+              <th>Rules</th>
+              <th>Base (mins)</th>
+              <th>Extra (mins)</th>
+              <th>Total (mins)</th>
+              <th>Starts</th>
+              <th>Ends (base)</th>
+              <th>Ends (adjusted)</th>
+              <th>Warn -15</th>
+              <th>Warn -5</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
       <div id="noteLine" class="hint"></div>
     </div>
   </div>
@@ -134,61 +160,62 @@
   <script>
     // ---------- Utilities ----------
     const el = id => document.getElementById(id);
+    const ceil = (x) => Math.ceil(x); // always round up
 
     function parseDuration(s){
       if(!s) return NaN;
       s = String(s).trim();
-      if(/^\d+$/.test(s)) return parseInt(s,10); // plain minutes
+      if(/^\d+$/.test(s)) return parseInt(s,10); // minutes
       const m = s.match(/^(\d{1,2}):(\d{2})$/);
-      if(m){
-        return parseInt(m[1],10)*60 + parseInt(m[2],10);
-      }
+      if(m){ return parseInt(m[1],10)*60 + parseInt(m[2],10); }
       return NaN;
-    }
-
-    function fmtMins(total){
-      const h = Math.floor(total/60);
-      const m = total%60;
-      return `${h}:${String(m).padStart(2,'0')}`;
     }
 
     function parseTimeHHMM(s){
       if(!s) return null;
-      const m = s.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
-      if(!m) return null;
-      const now = new Date();
-      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(m[1],10), parseInt(m[2],10), 0, 0);
-      return d;
+      s = String(s).trim();
+      // HH:MM
+      let m = s.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+      if(m){
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(m[1],10), parseInt(m[2],10), 0, 0);
+      }
+      // 3-4 digits like 900 / 0930 / 1800
+      if(/^\d{3,4}$/.test(s)){
+        const n = parseInt(s,10);
+        const hh = Math.floor(n/100), mm = n%100;
+        if(hh>=0 && hh<=23 && mm>=0 && mm<=59){
+          const now = new Date();
+          return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+        }
+      }
+      return null;
     }
 
-    function addMinutes(date, mins){
-      if(!date) return null;
-      const d = new Date(date.getTime());
-      d.setMinutes(d.getMinutes()+mins);
-      return d;
-    }
-
-    function fmtTime(d){
-      if(!d) return '';
-      const hh = String(d.getHours()).padStart(2,'0');
-      const mm = String(d.getMinutes()).padStart(2,'0');
-      return `${hh}:${mm}`;
-    }
-
-    // Always round up helper (e.g., 2.1 -> 3, 2.5 -> 3)
-    const ceil = (x) => Math.ceil(x);
+    function addMinutes(date, mins){ if(!date) return null; const d=new Date(date.getTime()); d.setMinutes(d.getMinutes()+mins); return d; }
+    function fmtTime(d){ if(!d) return ''; const hh=String(d.getHours()).padStart(2,'0'); const mm=String(d.getMinutes()).padStart(2,'0'); return `${hh}:${mm}`; }
 
     // ---------- State ----------
     let students = []; // {name, pct, stdRule}
 
+    // New logic: apply % first (ceil), then 5-min breaks per 45 based on interim total (ceil), eligiblity base>=90
     function calcStudentExtra(baseMins, s){
-      let extra = 0;
-      if(s.pct>0){ extra += ceil(baseMins * (s.pct/100)); }
-      if(s.stdRule && baseMins >= 90){
-        const blocks = ceil(baseMins / 45);
-        extra += blocks * 5;
+      let extraPct = 0;
+      if(s.pct>0){ extraPct = ceil(baseMins * (s.pct/100)); }
+      const interimTotal = baseMins + extraPct;
+      let extraBreak = 0;
+      if(s.stdRule && interimTotal >= 90){
+        const blocks = ceil(interimTotal / 45);
+        extraBreak = blocks * 5;
       }
-      return extra;
+      return extraPct + extraBreak;
+    }
+
+    function ruleSummary(s){
+      const tags = [];
+      if(s.pct>0) tags.push(`<span class="pill">+${s.pct}%</span>`);
+      if(s.stdRule) tags.push(`<span class="pill">+5m/45m (after %, total≥90)</span>`);
+      return tags.join(' ');
     }
 
     function render(){
@@ -228,39 +255,23 @@
         tbody.appendChild(tr);
       });
 
-      if(note){ el('noteLine').textContent = `Note: ${note}`; } else { el('noteLine').textContent = ''; }
+      el('noteLine').textContent = note? `Note: ${note}` : '';
     }
 
-    function ruleSummary(s){
-      const tags = [];
-      if(s.pct>0) tags.push(`<span class="pill">+${s.pct}%</span>`);
-      if(s.stdRule) tags.push(`<span class="pill">+5m/45m (base≥90)</span>`);
-      return tags.join(' ');
-    }
+    function getSelectedPct(){ const boxes=[...document.querySelectorAll('.pctBox')]; const c=boxes.find(b=>b.checked); return c? parseInt(c.value,10):0; }
 
     function addStudent(){
       const name = (el('s_name').value||'').trim();
       const pct = getSelectedPct();
       const stdRule = el('s_stdRule').checked;
-
       const err = [];
       if(!name) err.push('Student name is required.');
-      if(err.length){
-        showError(err.join(' '));
-        return;
-      }
+      if(err.length){ showError(err.join(' ')); return; }
       hideError();
-
       students.push({name,pct,stdRule});
       clearStudentInputs();
       persist();
       render();
-    }
-
-    function getSelectedPct(){
-      const boxes = [...document.querySelectorAll('.pctBox')];
-      const chosen = boxes.find(b=>b.checked);
-      return chosen ? parseInt(chosen.value,10) : 0;
     }
 
     function clearStudentInputs(){
@@ -311,41 +322,20 @@
       students = [];
       localStorage.removeItem('examCalcState');
       ['baseDuration','startTime','note'].forEach(id=>el(id).value='');
+      document.querySelectorAll('.pctBox').forEach(b=>b.checked=false);
+      el('s_stdRule').checked=false;
       render();
     }
 
-    function escapeHtml(s){
-      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
-    }
-    function stripHtml(s){
-      const div=document.createElement('div');
-      div.innerHTML=s; return div.textContent||div.innerText||'';
-    }
-    function escapeCsv(s){
-      s = String(s);
-      if(s.includes('"')||s.includes(',')||s.includes('\n')){
-        return '"'+s.replace(/"/g,'""')+'"';
-      }
-      return s;
-    }
-    function downloadFile(filename, mime, content){
-      const blob = new Blob([content], {type:mime});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      setTimeout(()=>URL.revokeObjectURL(url), 0);
-    }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+    function stripHtml(s){ const div=document.createElement('div'); div.innerHTML=s; return div.textContent||div.innerText||''; }
+    function escapeCsv(s){ s=String(s); if(s.includes('"')||s.includes(',')||s.includes('\n')){ return '"'+s.replace(/"/g,'""')+'"'; } return s; }
+    function downloadFile(filename, mime, content){ const blob=new Blob([content], {type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),0); }
 
     function persist(){
-      const state = {
-        baseDuration: el('baseDuration').value,
-        startTime: el('startTime').value,
-        note: el('note').value,
-        students
-      };
+      const state = { baseDuration: el('baseDuration').value, startTime: el('startTime').value, note: el('note').value, students, theme: document.body.classList.contains('light')? 'light':'dark' };
       localStorage.setItem('examCalcState', JSON.stringify(state));
     }
-
     function restore(){
       const raw = localStorage.getItem('examCalcState');
       if(!raw) return;
@@ -355,10 +345,36 @@
         el('startTime').value = s.startTime||'';
         el('note').value = s.note||'';
         students = Array.isArray(s.students)? s.students: [];
+        if(s.theme==='light'){ document.body.classList.add('light'); }
+        updateModeEmoji();
       }catch{ /* ignore */ }
     }
 
-    function loadExamples(){
+    // Mode toggle
+    const modeBtn = document.getElementById('modeBtn');
+    const modeEmoji = document.getElementById('modeEmoji');
+    function updateModeEmoji(){
+      modeEmoji.textContent = document.body.classList.contains('light') ? '🌞' : '🌙';
+    }
+    modeBtn.addEventListener('click', ()=>{ document.body.classList.toggle('light'); updateModeEmoji(); persist(); });
+
+    // Enforce single selection for % checkboxes
+    function initPctBoxes(){
+      const boxes = document.querySelectorAll('.pctBox');
+      boxes.forEach(b=>{
+        b.addEventListener('change', (e)=>{
+          if(e.target.checked){ boxes.forEach(other=>{ if(other!==e.target) other.checked=false; }); }
+        });
+      });
+    }
+
+    // Events
+    el('addBtn').addEventListener('click', ()=>{ addStudent(); });
+    el('recalcBtn').addEventListener('click', ()=>{ persist(); render(); });
+    el('exportCsv').addEventListener('click', exportCSV);
+    el('printBtn').addEventListener('click', printPage);
+    el('resetBtn').addEventListener('click', resetAll);
+    el('sampleBtn').addEventListener('click', ()=>{
       students = [
         {name:'Lee Hiu Lam (S0001)', pct:25, stdRule:false},
         {name:'Ng Wai Man (S0002)', pct:50, stdRule:true},
@@ -367,34 +383,14 @@
       ];
       persist();
       render();
-    }
-
-    // Enforce single checkbox selection for percentage boxes
-    function initPctBoxes(){
-      const boxes = document.querySelectorAll('.pctBox');
-      boxes.forEach(b=>{
-        b.addEventListener('change', (e)=>{
-          if(e.target.checked){
-            boxes.forEach(other=>{ if(other!==e.target) other.checked=false; });
-          }
-        });
-      });
-    }
-
-    // ---------- Events ----------
-    el('addBtn').addEventListener('click', ()=>{ addStudent(); });
-    el('recalcBtn').addEventListener('click', ()=>{ persist(); render(); });
-    el('exportCsv').addEventListener('click', exportCSV);
-    el('printBtn').addEventListener('click', printPage);
-    el('resetBtn').addEventListener('click', resetAll);
-    el('sampleBtn').addEventListener('click', loadExamples);
+    });
 
     ['baseDuration','startTime','note'].forEach(id=>{
       el(id).addEventListener('change', ()=>{ persist(); render(); });
       el(id).addEventListener('keyup', ()=>{ persist(); render(); });
     });
 
-    // ---------- Init ----------
+    // Init
     restore();
     initPctBoxes();
     render();
